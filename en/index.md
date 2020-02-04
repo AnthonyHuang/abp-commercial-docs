@@ -8,3 +8,14 @@ Welcome to the ABP Commercial documentation.
 
 If you've already purchased the ABP Commercial, use the [Getting started](getting-started.md) document to setup your development environment and start to develop your application.
 
+````json
+//[doc-template]
+{
+  "name": "package-installation",
+  "parameters": {
+      "PackageName" : "Volo.Abp.FluentValidation",
+	  "ModuleClassName" : "AbpFluentValidationModule"
+  }
+}
+````
+

@@ -1,0 +1,12 @@
+{
+  "templates": [
+    {
+      "name": "package-installation",
+      "path": "doc-templates/package-installation.md",
+      "parameters": [
+	    "PackageName",
+		"ModuleClassName"
+	  ]
+    }
+  ]
+}

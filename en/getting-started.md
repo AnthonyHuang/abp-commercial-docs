@@ -17,6 +17,17 @@ First things first! Let's setup your development environment before creating the
 
 ### Pre-requirements
 
+````json
+//[doc-template]
+{
+  "name": "package-installation",
+  "parameters": {
+      "PackageName" : "Volo.Abp.FluentValidation",
+	  "ModuleClassName" : "AbpFluentValidationModule"
+  }
+}
+````
+
 The following tools should be installed on your development machine:
 
 * [Visual Studio 2019 (v16.3+)](https://visualstudio.microsoft.com/vs/) for Windows / [Visual Studio for Mac](https://visualstudio.microsoft.com/vs/mac/).
