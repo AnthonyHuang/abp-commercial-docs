@@ -14,7 +14,7 @@ Adds your existing solution which was created from the [ABP CLI](https://docs.ab
 ````json
 //[doc-template]
 {
-  "name": "package-installation",
+  "path": "package-installation",
   "parameters": {
       "PackageName" : "Volo.Abp.FluentValidation",
 	  "ModuleClassName" : "AbpFluentValidationModule"
