@@ -11,7 +11,7 @@ If you've already purchased the ABP Commercial, use the [Getting started](gettin
 ````json
 //[doc-template]
 {
-  "name": "package-installation",
+  "path": "doc-templates/package-installation.md",
   "parameters": {
       "PackageName" : "Volo.Abp.FluentValidation",
 	  "ModuleClassName" : "AbpFluentValidationModule"

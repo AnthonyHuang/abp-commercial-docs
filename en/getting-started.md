@@ -20,7 +20,7 @@ First things first! Let's setup your development environment before creating the
 ````json
 //[doc-template]
 {
-  "path": "package-installation",
+  "path": "doc-templates/package-installation.md",
   "parameters": {
       "PackageName" : "Volo.Abp.FluentValidation",
 	  "ModuleClassName" : "AbpFluentValidationModule"
