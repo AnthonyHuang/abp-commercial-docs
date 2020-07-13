@@ -40,7 +40,7 @@ The `Volo.Chat.SignalR` package must be added according to your project structur
   * **Unified Backend**: **{ProjectName}.HttpApi.Host project.
   * **Separated Identity Server**:  **{ProjectName}.HttpApi.Host project. 
 
-If database provider of your project is **EntityFrameworkCore**, use `modelBuilder.ConfigureChat()` to configure database tables in your project's **{ProjectName}MigrationsDbContext** class. You can find that class in **{ProjectName}.EntityFrameworkCore.DbMigrations** project.
+If database provider of your project is **EntityFrameworkCore**, use `modelBuilder.ConfigureChat()` to configure database tables in your project's **{ProjectName}MigrationsDbContext** class. You can find that class in **{ProjectName}.EntityFrameworkCore.DbMigrations** project. After that, add a new migration and run **{ProjectName}.DbMigrator** project.
 
 ## Configuration
 
