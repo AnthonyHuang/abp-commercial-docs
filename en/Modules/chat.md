@@ -4,11 +4,9 @@ This module implements real time messaging between users for an application.
 
 See [the module description page](https://commercial.abp.io/modules/Volo.Chat) for an overview of the module features.
 
-## How to install
+## How To Install
 
 Chat module is not installed in [the startup templates](../Startup-Templates/Index). So, it needs to be installed manually. There are two ways of installing a module into your application.
-
-### Installation
 
 #### 1. Using ABP Suite
 
@@ -44,9 +42,9 @@ The `Volo.Chat.SignalR` package must be added according to your project structur
 
 If database provider of your project is **EntityFrameworkCore**, use `modelBuilder.ConfigureChat()` to configure database tables in your project's DbContext.
 
-### Configuration
+## Configuration
 
-#### SignalR Access token configuration for Angular projects
+### SignalR Access token configuration for Angular projects
 
 See [Microsoft SignalR Authentication and Authorization](https://docs.microsoft.com/en-us/aspnet/core/signalr/authn-and-authz) and [Microsoft SignalR Security](https://docs.microsoft.com/en-us/aspnet/core/signalr/security#access-token-logging) documentations.
 
@@ -71,17 +69,89 @@ app.Use(async (httpContext, next) =>
 });
 ```
 
-#### Adding Distributed Event Bus for distributed architecture projects
+This configuration can be placed at the beginning of `OnApplicationInitialization` method  of the project module class which depends on `Volo.Chat.SignalR`, before `app.UseAuthentication()`.
 
-When Web & API tiers are separated, it is impossible to directly send a server-to-client message from the HTTP API. This is also true for a microservice architected application. **Chat Module** uses the distributed event bus to deliver the message from API application to the web application, then to the client.
+### Adding Distributed Event Bus For Distributed Architecture Projects
 
-If your project has such an architecture (example: MVC + tiered option), then you need a Distributed Event Bus. See [related ABP documentation](https://docs.abp.io/en/abp/latest/Distributed-Event-Bus) to understand Distributed Event Bus system in ABP framework. Also see [RabbitMQ Integration documentation](https://docs.abp.io/en/abp/latest/Distributed-Event-Bus-RabbitMQ-Integration) if your choice is to use RabbitMQ.
+When Web & API tiers are separated, it is impossible to directly send a server-to-client message from the HTTP API. This is also true for a microservice architected application. **Chat Module** uses the distributed event bus to deliver the message from API application to the web application, then to the client. If your project has such an architecture (example: MVC + tiered option), then you need a [Distributed Event Bus](https://docs.abp.io/en/abp/latest/Distributed-Event-Bus).
+
+#### Example RabbitMQ Configuration for MVC + Tiered Projects
+
+Following steps are example for a newly downloaded MVC + Tiered solution. You can follow these to easily configure RabbitMQ in your application.
+
+Firstly, add `Volo.Abp.EventBus.RabbitMQ` package to  **{ProjectName}.HttpApi.Host.csproj** and **{ProjectName}.Web.csproj** projects. 
+
+```` xml
+<PackageReference Include="Volo.Abp.EventBus.RabbitMQ" Version="X.X.X" />
+````
+And add the dependency to **{ProjectName}WebModule** and **{ProjectName}HttpApiHostModule** classes.
+````csharp
+    [DependsOn(
+        ...
+        typeof(AbpEventBusRabbitMqModule),
+        ...
+    )]
+    public class {ModuleName}Module : AbpModule
+    {
+````
+Then add RabbitMq configuration to **appsettings.json** files of related projects:
+
+For **{ProjectName}.HttpApi.Host** project:
+````json
+  "RabbitMQ": {
+    "Connections": {
+      "Default": {
+        "HostName": "localhost"
+      }
+    },
+    "EventBus": {
+      "ClientName": "{ProjectName}_Web",
+      "ExchangeName": "{ProjectName}Test"
+    }
+  }
+````
+
+For **{ProjectName}.Web** project:
+````json
+  "RabbitMQ": {
+    "Connections": {
+      "Default": {
+        "HostName": "localhost"
+      }
+    },
+    "EventBus": {
+      "ClientName": "{ProjectName}_Web",
+      "ExchangeName": "{ProjectName}Test"
+    }
+  }
+````
+And as the last step, add the following code block to `ConfigureServices` method of the module classes of **both** projects:
+````csharp
+using StackExchange.Redis;
+using Volo.Abp.EventBus.RabbitMq;
+...
+            context.Services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = configuration["Redis:Configuration"];
+            });
+
+            if (!hostingEnvironment.IsDevelopment())
+            {
+                var redis = ConnectionMultiplexer.Connect(configuration["Redis:Configuration"]);
+                context.Services
+                    .AddDataProtection()
+                    .PersistKeysToStackExchangeRedis(redis, "Chat-Protection-Keys");
+            }
+
+````
+
+For more information, see [RabbitMQ Integration documentation](https://docs.abp.io/en/abp/latest/Distributed-Event-Bus-RabbitMQ-Integration).
 
 ## Packages
 
 This module follows the [module development best practices guide](https://docs.abp.io/en/abp/latest/Best-Practices/Index) and consists of several NuGet and NPM packages. See the guide if you want to understand the packages and relations between them.
 
-### NuGet packages
+### NuGet Packages
 
 * Volo.Chat.Domain.Shared
 * Volo.Chat.Domain
@@ -94,55 +164,36 @@ This module follows the [module development best practices guide](https://docs.a
 * Volo.Chat.Web
 * Volo.Chat.SignalR
 
-### Npm packages
+### Npm Packages
 
 * @volo/chat (MVC)
 * @volo/abp.ng.chat (Angular)
 * @volo/abp.ng.chat.config (Angular)
 
-## User interface
+## User Interface
 
-#### Chat page
+#### Chat Page
 
 This is the page that users send messages to each other.
 
 ![chat-page](../images/chat-page.png)
 
-#### Chat icon on navigation bar
+#### Chat Icon On Navigation Bar
 
 An icon that shows unread message count of the user and leads to chat page when clicked is added to navigation menu.
 
 ![chat-page](../images/chat-icon.png)
 
-## Options
-
-This module doesn't define any option.
-
 ## Internals
 
-### Domain layer
+### Domain Layer
 
-#### Entities and aggregate roots
+#### Entities And Aggregate Roots
 
 * `Message` (aggregate root): Represents a chat message. Implements `IMultiTenant`.
-  * `Text`: Message content.
-  * `IsAllRead`: Message read information.
-  * `ReadTime`: Message read time information.
 * `ChatUser` (aggregate root): Represents a chat user. Implements `IUser` and `IUpdateUserData` interfaces.
 * `UserMessage`: is created for each side (sender and receiver) of a message. Implements `IMultiTenant` and `IAggregateRoot` interfaces.
-  *  `ChatMessageId`: Id of related `Message`.
-  *  `UserId`: Id of related `ChatUser.`
-  *  `TargetUserId`: Id of other related `ChatUser`.
-  *  `Side`: States that if it is a send message or received message.
-  *  `IsRead`: Read information.
-  *  `ReadTime`: Read time information.
 * `Conversation`: is created for each side of a conversation between users. Implements `IMultiTenant` and `IAggregateRoot` interfaces.
-  *  `UserId`: Id of related `ChatUser.`
-  *  `TargetUserId`: Id of other related `ChatUser`.
-  *  `LastMessageSide`: States the side of the latest message (send or received).
-  *  `LastMessage`: Content of the last message in the conversation.
-  *  `LastMessageDate`: Date of the last message in the conversation.
-  *  `UnreadMessageCount`: Count of unread messages in the conversation.
 
 #### Repositories
 
@@ -161,7 +212,7 @@ Following custom repositories are defined for this module:
 
 ### Application layer
 
-#### Application services
+#### Application Services
 
 * `ConversationAppService` (implements `IConversationAppService`): Used to send messages, get conversation between users and mark a conversation as read.
 * `SettingsAppService` (implements `ISettingsAppService`): Used to save chat settings.
@@ -169,15 +220,15 @@ Following custom repositories are defined for this module:
 * `DistributedEventBusRealTimeChatMessageSender` (implements `IRealTimeChatMessageSender`): Used to publish chat messages to distributed event bus.
 * `SignalRRealTimeChatMessageSender` (implements `IRealTimeChatMessageSender`): Used to send messages to target `SignalR` client.
 
-### Database providers
+### Database Providers
 
 #### Common
 
-##### Table / collection prefix & schema
+##### Table / Collection Prefix & Schema
 
 All tables/collections use the `Chat` prefix by default. Set static properties on the `ChatDbProperties` class if you need to change the table prefix or set a schema name (if supported by your database provider).
 
-##### Connection string
+##### Connection String
 
 This module uses `Chat` for the connection string name. If you don't define a connection string with this name, it fallbacks to the `Default` connection string.
 
